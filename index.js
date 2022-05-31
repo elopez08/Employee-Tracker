@@ -1,4 +1,4 @@
-const express = require('express');
+//const express = require('express');
 //We have a connection using connection.js.  Has port information and require for mysql2
 const db = require('./db/connection');
 
@@ -152,7 +152,7 @@ function viewEmployees() {
     console.log(`Viewing Employees... \n`);
     //THEN I am presented with a formatted table showing 1) employee data, including 2) employee ids, 3) first names, 4) last names, 5) job titles, 6) departments, 7) salaries, and 8) managers that the employees report to
         //THIS NEEDS MODIFYING
-        let query = "SELECT *FROM employee ";
+        let query = "SELECT * FROM employee ";
         db.query(query, function(err,res) {
             if (err)
             {
