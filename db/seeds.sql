@@ -1,25 +1,33 @@
-/*THEN I am presented with a formatted table showing 1) department names and 2) department ids*/
-INSERT INTO department 
-    (department_name, department_id)
-VALUES 
-    ('Software Engineer','1'),
-    ('Software Engineer','1'),
-    ('Software Engineer','1');
+USE employee_DB;
 
+INSERT INTO department
+    (name)
+VALUES
+    ('Sales'),
+    ('Engineering'),
+    ('Finance'),
+    ('Legal');
 
-/*THEN I am presented with the 1) job title, 2) role id, 3) the department that role belongs to, and 4) the salary for that role*/
-
-INSERT INTO role 
-    (role_title, role_id, department_name, salary)
-VALUES 
-    ('Programmer', '3', 'Software Engineer', '50000'),
-    ('Programmer', '3', 'Software Engineer', '50000'),
-    ('Programmer', '3', 'Software Engineer', '50000');
-
+INSERT INTO role
+    (title, salary, department_id)
+VALUES
+    ('Sales Lead', 100000, 1),
+    ('Salesperson', 80000, 1),
+    ('Lead Engineer', 150000, 2),
+    ('Software Engineer', 120000, 2),
+    ('Account Manager', 160000, 3),
+    ('Accountant', 125000, 3),
+    ('Legal Team Lead', 250000, 4),
+    ('Lawyer', 190000, 4);
 
 INSERT INTO employee
-    (employee_id, first_name, last_name, role_title, department_name, salary, manager_id)
-VALUES 
-    ('2', 'Adam', 'Joe', 'Software Engineer', '500000', 'Jen'),
-    ('2', 'Jack', 'Joe', 'Software Engineer', '500000', 'Jen'),
-    ('2', 'Bob', 'Joe', 'Software Engineer', '500000', 'Jen');
+    (first_name, last_name, role_id, manager_id)
+VALUES
+    ('John', 'Doe', 1, NULL),
+    ('Mike', 'Chan', 2, 1),
+    ('Ashley', 'Rodriguez', 3, NULL),
+    ('Kevin', 'Tupik', 4, 3),
+    ('Kunal', 'Singh', 5, NULL),
+    ('Malia', 'Brown', 6, 5),
+    ('Sarah', 'Lourd', 7, NULL),
+    ('Tom', 'Allen', 8, 7);

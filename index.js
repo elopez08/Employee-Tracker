@@ -11,6 +11,7 @@ const path = require("path");
 //Default Settings:
 const fs = require("fs");
 const inquirer = require("inquirer");
+const { restoreDefaultPrompts } = require('inquirer');
 
 
 db.connect(function (err) {
@@ -47,9 +48,9 @@ db.connect(function (err) {
 function firstPrompt() {
 
     inquirer.prompt([{
-        type: list,
+        type: 'list',
         message: `What would you like to do? `,
-        name: task,
+        name: `task`,
         //THEN I am presented with the following options: view all departments, view all roles, view all employees, add a department, add a role, add an employee, and update an employee role
         choices: [
         `View All Derpartments`, 
@@ -93,11 +94,14 @@ function firstPrompt() {
 //View Department Function
 function viewDepartment() {
     
-    console.log(`Initializing Viewing All Departments... \n`),
-    console.log(`Viewing Department Names & Department IDs... \n`),
+    console.log(`Initializing Viewing All Departments... \n`);
+    console.log(`Viewing Department Names & Department IDs... \n`);
+
     //THEN I am presented with a formatted table showing 1) department names and 2) department ids
-    //NEEDS TO BE EDITED
-    connection.query("SELECT department.id AS ID, department.name AS Department FROM department",
+    //This is a long way to do it since we're taking the ID from the ID info and then loading the name from the department
+
+    let query = "SELECT department.id AS ID, department.name AS Department FROM department";
+    db.query(query,
         function(err,res) {
             if (err)
             {
@@ -123,20 +127,22 @@ function viewDepartment() {
 
 //View Roles Function
 function viewRoles() {
-    console.log(`Viewing Roles... \n`),
-    console.log(`Viewing the Job Title, Role ID, Department that it belongs, and Salary for the Role`),
+    console.log(`Viewing Roles... \n`);
+    console.log(`Viewing the Job Title, Role ID, Department that it belongs, and Salary for the Role`);
     //THEN I am presented with the 1) job title, 2) role id, 3) the department that role belongs to, and 4) the salary for that role
 
-    //THIS NEEDS MODIFYING
-    connection.query("SELECT role.title AS Job Title, role.name AS Department FROM department, salary ",
+    //When we put this in the query, we are then stating to SELECT all the information from the role table, meaning it'll display the table itself
+
+    let query = "SELECT * FROM role";
+    //connection.query("SELECT role.title AS Job Title, role.name AS Department FROM department, salary ",
     //END OF MODIFICATION
-    function(err,res) {
+    db.query(query, function(err,res) {
         if (err)
         {
             throw err;
         }
         console.log(``)
-        console.log(`***Department List***`)
+        console.log(`***Roles List***`)
         console.log(``)
         console.table(res)
         //Needs to display:  Job Title, Role ID, Department, and Salary
@@ -151,9 +157,9 @@ function viewRoles() {
 function viewEmployees() {
     console.log(`Viewing Employees... \n`);
     //THEN I am presented with a formatted table showing 1) employee data, including 2) employee ids, 3) first names, 4) last names, 5) job titles, 6) departments, 7) salaries, and 8) managers that the employees report to
-        //THIS NEEDS MODIFYING
-        let query = "SELECT * FROM employee ";
-        db.query(query, function(err,res) {
+    //THIS NEEDS MODIFYING
+    let query = "SELECT * FROM employee ";
+    db.query(query, function(err,res) {
             if (err)
             {
                 throw err;
@@ -181,9 +187,9 @@ function addDepartment() {
     //THEN I am prompted to enter the name of the department and that department is added to the database
     inquirer.prompt([
         {
-            name: firstname,
-            type: input,
-            message: `What's the first name of the department?`,
+            name: `departmentname`,
+            type: `input`,
+            message: `What's the name of the department you're trying to add?`,
             validate: departnameinput => {
                 if(departnameinput)
                 {
@@ -198,7 +204,27 @@ function addDepartment() {
         }
         //Gathers the information from the department and then adds it to the list
     ]).then(answersdepartment => {
+        //What line of string causes it to add?
+        //INSERT INTO department(name) VALUES ('set_values');
+
+        let query = `INSERT INTO department (name) VALUES ('${answersdepartment.departmentname}')`;
         //What do we need to do to add this to the database
+
+        db.query(query, function(err,res) {
+            if (err)
+            {
+                throw err;
+            }
+            console.log(``)
+            console.log(`***UPDATING Department List***`)
+            console.log(``)
+            //There's a neat trick you can do in displaying the function by applying this method:
+            console.table(res)
+            firstPrompt();
+
+
+        })
+
     })
 
 
@@ -212,9 +238,9 @@ function addRole() {
 
     inquirer.prompt([
         {
-            name: firstname,
-            type: input,
-            message: `What's the first name of the Employee?`,
+            name: `positionname`,
+            type: `input`,
+            message: `What's the name of the position?`,
             validate: firstnameinput => {
                 if(firstnameinput)
                 {
@@ -222,14 +248,14 @@ function addRole() {
                 }
                 else
                 {
-                    console.log(`Need a first name of the employee!`);
+                    console.log(`Right down the position name!`);
                     return false;
                 }
             }
         },
         {
-            name: lastname,
-            type: input,
+            name: `salary`,
+            type: `input`,
             message: `What's the salary the Employee?`,
             validate: lastnameinput => {
                 if(lastnameinput)
@@ -244,9 +270,9 @@ function addRole() {
             }
         },
         {
-            name: roleinput,
-            type: input,
-            message: `What's their department?`,
+            name: `department_id`,
+            type: `input`,
+            message: `What's their department ID?`,
             validate: roleinput => {
                 if(roleinput)
                 {
@@ -262,6 +288,28 @@ function addRole() {
     ]).then(function (answerrole) {
 
         //Add the information from the given function to the database
+
+        //What line of string causes it to add?
+        //INSERT INTO department(name) VALUES ('set_values');
+
+        let query = `INSERT INTO role (title, salary, department_id) VALUES ('${answerrole.positionname}' ,'${answerrole.salary}' ,'${answerrole.department_id}' )`;
+        //What do we need to do to add this to the database
+
+        db.query(query, function(err,res) {
+            if (err)
+            {
+                throw err;
+            }
+            console.log(``)
+            console.log(`***UPDATING Department List***`)
+            console.log(``)
+            //There's a neat trick you can do in displaying the function by applying this method:
+            console.table(res)
+            firstPrompt();
+
+
+        })
+
     })
 
 
@@ -275,8 +323,8 @@ function addEmployee() {
 
     inquirer.prompt([
         {
-            name: firstname,
-            type: input,
+            name: `firstname`,
+            type: `input`,
             message: `What's the first name of the Employee?`,
             validate: firstnameinput => {
                 if(firstnameinput)
@@ -291,8 +339,8 @@ function addEmployee() {
             }
         },
         {
-            name: lastname,
-            type: input,
+            name: `lastname`,
+            type: `input`,
             message: `What's the last name of the Employee?`,
             validate: lastnameinput => {
                 if(lastnameinput)
@@ -307,9 +355,9 @@ function addEmployee() {
             }
         },
         {
-            name: roleinput,
-            type: input,
-            message: `What's the role of the Employee?`,
+            name: `roleinput`,
+            type: `input`,
+            message: `What's the number of the role?`,
             validate: roleinput => {
                 if(roleinput)
                 {
@@ -317,15 +365,15 @@ function addEmployee() {
                 }
                 else
                 {
-                    console.log(`Need to have a role of the employee!`);
+                    console.log(`Type in a role number!`);
                     return false;
                 }
             }
         },
         {
-            name: managername,
-            type: input,
-            message: `What's the role of the Employee?`,
+            name: `managername`,
+            type: `input`,
+            message: `What's the ID of the manager?`,
             validate: managernameinput => {
                 if(managernameinput)
                 {
@@ -333,13 +381,36 @@ function addEmployee() {
                 }
                 else
                 {
-                    console.log(`Need to have a manager for the employee!`);
+                    console.log(`Need to have a manager's ID for the employee!`);
                     return false;
                 }
             }
         }
     ]).then(function (answeremployee) {
         //Add to database from given information
+
+        //What line of string causes it to add?
+        //INSERT INTO department(name) VALUES ('set_values');
+
+        let query = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('${answeremployee.firstname}' ,'${answeremployee.lastname}' ,'${answeremployee.roleinput}' ,'${answeremployee.managername}' ) `;
+        //What do we need to do to add this to the database
+
+        db.query(query, function(err,res) {
+            if (err)
+            {
+                throw err;
+            }
+            console.log(``)
+            console.log(`***UPDATING Department List***`)
+            console.log(``)
+            //There's a neat trick you can do in displaying the function by applying this method:
+            console.table(res)
+            firstPrompt();
+
+
+        })
+
+
     })
 
 }
@@ -348,5 +419,93 @@ function addEmployee() {
 //Update Employee Role Function
 function updateEmployeeRole() {
     console.log(`Update Employee Role Section \n`);
+
+    let query = "SELECT first_name FROM employee ";
     //THEN I am prompted to select an employee to update and their new role and this information is updated in the database
+
+    db.query(query, function(err,result,fields) {
+
+        if (err)
+        {
+            throw err;
+        }
+
+        //MAKE SURE YOU DO THIS!  After reading the query information, we'll use the employeelist as a const.  What happens next is that we're going to get the result (that was gathered from the table) and then MAP IT OUT.  We're storing that INFORMATION array in the value (which in this case, it is the data.first_name, which is the first_name from the employee table)
+        const employeelist = result.map (data => ({
+            value: data.first_name
+        }));
+
+        //Start out an empty array
+        console.log(``);
+        console.log(`***Employees List***`);
+        console.log(``);
+        console.table(result);
+
+        console.log(`===========================================`);
+
+        inquirer.prompt([
+            {
+                //Prompt to select an EXISTING employee in the database
+                type: 'list',
+                message: `Which employee are you planning to update? `,
+                name: `name`,
+                //THEN I am presented with the following options: view all departments, view all roles, view all employees, add a department, add a role, add an employee, and update an employee role
+                choices: employeelist
+                //Then, UPDATE their role by inputing what needs to be in the system (role.id)
+        
+            },
+            {
+                type:`input`,
+                message: `With the employee you want to change roles selected, please type a number ID for the employee. `,
+                name: `id_role`,
+                validate: answers => {
+                    if(answers)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        console.log(`Need a number for the employee!  Type in a role number!`);
+                        return false;
+                    }
+                }
+
+            }
+        ]).then(function (roleupdate) {
+    
+    
+            /*
+            SAMPLE:
+    
+            UPDATE Customers
+            SET ContactName = 'Alfred Schmidt', City = 'Frankfurt'
+            WHERE CustomerID = 1;
+    
+            let query = `UPDATE employee SET role_id = (inserted information) WHERE first_name = (name_selected)`;
+    
+            */
+           let query_second = `UPDATE employee SET role_id = ('${roleupdate.id_role}') WHERE first_name = ('${roleupdate.name}')`;
+
+           db.query(query_second, function(err, res) {
+               if(err)
+               {
+                   throw err;
+               }
+               console.log(``)
+               console.log(`***UPDATED Employee List***`)
+               console.log(``)
+               console.table(res)
+               //Needs to display:  Job Title, Role ID, Department, and Salary
+       
+               firstPrompt();
+       
+
+           })
+        })
+    
+
+    })
+
+    
+
 }

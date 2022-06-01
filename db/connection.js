@@ -5,7 +5,7 @@ const db = mysql.createConnection({
     //Have it localized
     host: `127.0.0.1`,
     //Using Port: 3001
-    port: 3001,
+    port: 3306,
     //For now, have the user be 'root'
     user: `root`,
     //Our password that we use for the SQL
